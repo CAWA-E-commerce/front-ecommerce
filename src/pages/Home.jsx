@@ -1,12 +1,33 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Typography } from '@mui/material';
 import Threads from '../Backgrounds/Threads/Threads';
+import useCartStore from '../stores/cartStore';
 
 const Home = () => {
   const [error, setError] = useState(null);
   const resultRef = useRef();
+  const addToCart = useCartStore((state) => state.addToCart);
 
   useEffect(() => {
+    // Exposer la fonction addToCart au window pour qu'elle soit accessible depuis le XSLT
+    window.addToCart = (button) => {
+      const product = {
+        id: button.getAttribute('data-product-id'),
+        name: button.getAttribute('data-product-name'),
+        price: parseFloat(button.getAttribute('data-product-price')),
+        image: button.getAttribute('data-product-image'),
+      };
+      console.log('product to add:', product);
+      addToCart(product);
+
+      button.textContent = 'Ajouté !';
+      button.style.backgroundColor = '#4CAF50';
+      setTimeout(() => {
+        button.textContent = 'Ajouter au panier';
+        button.style.backgroundColor = '';
+      }, 1000);
+    };
+
     const fetchAndTransform = async () => {
       try {
         const [xmlRes, xsltRes] = await Promise.all([
@@ -34,7 +55,12 @@ const Home = () => {
     };
 
     fetchAndTransform();
-  }, []);
+
+    // Nettoyage
+    return () => {
+      delete window.addToCart;
+    };
+  }, [addToCart]);
 
   return (
     <div
