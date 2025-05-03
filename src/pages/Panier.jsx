@@ -72,6 +72,11 @@ const Panier = () => {
         setError(`L'article "${item.name || 'inconnu'}" a une quantité invalide.`);
         return;
       }
+      if (!item.name || typeof item.name !== 'string' || item.name.trim() === '') {
+        console.log('Invalid item name:', item);
+        setError(`L'article "${item.name || 'inconnu'}" a un nom invalide.`);
+        return;
+      }
       if (!item.price || isNaN(item.price)) {
         console.log('Invalid item (invalid price):', item);
         setError(`L'article "${item.name || 'inconnu'}" a un prix invalide.`);
@@ -98,6 +103,7 @@ const Panier = () => {
         (item) => `
         <item>
           <product_id>${escapeXml(item.id)}</product_id>
+          <name>${escapeXml(item.name)}</name>
           <quantity>${item.quantity}</quantity>
           <price>${item.price}</price>
         </item>`
