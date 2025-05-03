@@ -5,25 +5,30 @@ import {
   TextField, CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import './Commandes.css'; // Import the CSS file for XSLT styling
 
 const Commandes = () => {
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [enteredCommandId, setEnteredCommandId] = useState('');
   const [commandToDelete, setCommandToDelete] = useState(null);
+  const [enteredCommandId, setEnteredCommandId] = useState('');
   const resultRef = useRef(null);
 
   useEffect(() => {
     window.deleteCommand = (commandId) => {
+      console.log('deleteCommand called with ID:', commandId);
       setCommandToDelete(commandId);
       setOpenDialog(true);
     };
 
     return () => {
+      console.log('Cleaning up deleteCommand');
       delete window.deleteCommand;
     };
   }, []);
+
   const fetchCommand = async (commandId) => {
     if (!commandId) {
       setError("Veuillez entrer un ID de commande");
@@ -33,6 +38,7 @@ const Commandes = () => {
     try {
       setLoading(true);
       setError(null);
+      setSuccess(null);
   
       const [xmlRes, xsltRes] = await Promise.all([
         fetch(`http://127.0.0.1:5000/commands/${commandId}`),
@@ -78,7 +84,6 @@ const Commandes = () => {
             console.log('Appending XSLT result:', resultDocument);
           
             if (!resultDocument) {
-              // Log additional context
               console.log('XML document:', xml);
               console.log('XSLT document:', xslt);
               throw new Error('XSLT transformation returned null');
@@ -125,6 +130,9 @@ const Commandes = () => {
   const handleDeleteConfirm = async () => {
     try {
       setLoading(true);
+      setError(null);
+      setSuccess(null);
+
       const res = await fetch(`http://127.0.0.1:5000/commands/${commandToDelete}`, {
         method: 'DELETE',
       });
@@ -137,48 +145,52 @@ const Commandes = () => {
       setOpenDialog(false);
       if (resultRef.current) resultRef.current.innerHTML = '';
       setEnteredCommandId('');
+      setSuccess('Commande supprimée avec succès');
       setLoading(false);
     } catch (err) {
-      setError(`Failed to delete command: ${err.message}`);
+      console.error('Delete error:', err);
+      setError(`Échec de la suppression de la commande: ${err.message}`);
       setLoading(false);
     }
   };
 
-  const handleDialogClose = () => setOpenDialog(false);
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setCommandToDelete(null);
+  };
 
   return (
     <Box className="min-h-screen bg-gray-900 p-8">
       <Paper elevation={3} sx={{ backgroundColor: '#1E293B', p: 3, mb: 4, borderRadius: '10px', borderLeft: '6px solid #3B82F6', margin:"auto", display:"flex", justifyContent:"center", flexDirection:"column", alignItems:"center" }}>
-      <Typography
-        variant="h1"
-        style={{
-          alignSelf: 'center',
-          color: 'white',
-          fontFamily: 'title',
-          marginBottom: '1rem',
-        }}
-      >
-       Commandes
-      </Typography>
-      
-      <Button
-        variant="outlined"
-        onClick={() => window.location.href = '/'}
-        sx={{
-          color: '#4CAF50',
-          borderColor: '#4CAF50',
-          fontFamily: 'title',
-          mb: 3,
-          '&:hover': {
-            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-            borderColor: '#45a049',
-          },
-          width:"200px"
-        }}
-      >
-        Retour à l'accueil
-      </Button>
-       
+        <Typography
+          variant="h1"
+          style={{
+            alignSelf: 'center',
+            color: 'white',
+            fontFamily: 'title',
+            marginBottom: '1rem',
+          }}
+        >
+          Commandes
+        </Typography>
+        
+        <Button
+          variant="outlined"
+          onClick={() => window.location.href = '/'}
+          sx={{
+            color: '#4CAF50',
+            borderColor: '#4CAF50',
+            fontFamily: 'title',
+            mb: 3,
+            '&:hover': {
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              borderColor: '#45a049',
+            },
+            width:"200px"
+          }}
+        >
+          Retour à l'accueil
+        </Button>
       </Paper>
   
       <Paper elevation={3} sx={{ backgroundColor: '#1E293B', p: 3, mb: 4, borderRadius: '10px' }}>
@@ -211,6 +223,7 @@ const Commandes = () => {
       </Paper>
   
       {error && <Alert severity="error" sx={{ mb: 4 }}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 4 }}>{success}</Alert>}
   
       <Box sx={{ backgroundColor: '#1E293B', p: 3, borderRadius: '10px', color: 'white' }}>
         {loading ? (
@@ -224,9 +237,9 @@ const Commandes = () => {
         ) : null}
         <div ref={resultRef}></div>
       </Box>
-  
+
       <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Confirmation</DialogTitle>
+        <DialogTitle>Confirmer la suppression</DialogTitle>
         <DialogContent>
           <Typography>Êtes-vous sûr de vouloir supprimer cette commande ?</Typography>
         </DialogContent>

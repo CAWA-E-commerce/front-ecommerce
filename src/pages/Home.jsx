@@ -149,7 +149,7 @@ const Home = () => {
               padding: '10px'
             }}
           >
-            <Badge badgeContent={cartItems.length} color="primary">
+            <Badge color="primary">
               <StoreIcon sx={{fontSize:"40px"}} />
             </Badge>
           </IconButton>
