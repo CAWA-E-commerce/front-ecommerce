@@ -26,14 +26,14 @@ const Home = () => {
         price: parseFloat(button.getAttribute('data-product-price')),
         image: button.getAttribute('data-product-image'),
       };
+    
       console.log('Button attributes:', {
-        id: button.getAttribute('data-product-id'),
-        name: button.getAttribute('data-product-name'),
-        price: button.getAttribute('data-product-price'),
-        image: button.getAttribute('data-product-image')
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image
       });
-      console.log('product to add:', product);
-
+    
       // Validate product ID
       if (!product.id || product.id === '') {
         console.warn('Cannot add product to cart: missing or empty product ID');
@@ -45,13 +45,23 @@ const Home = () => {
         }, 1000);
         return;
       }
-
+    
+      // Validate other attributes
+      if (!product.name || isNaN(product.price) || !product.image) {
+        console.warn('Cannot add product to cart: invalid product details');
+        button.textContent = 'Erreur: Données invalides';
+        button.style.backgroundColor = '#f44336';
+        setTimeout(() => {
+          button.textContent = 'Ajouter au panier';
+          button.style.backgroundColor = '';
+        }, 1000);
+        return;
+      }
+    
       addToCart(product);
-
-      // Save the added product and show modal
       setAddedProduct(product);
       setModalOpen(true);
-
+    
       button.textContent = 'Ajouté !';
       button.style.backgroundColor = '#4CAF50';
       setTimeout(() => {
