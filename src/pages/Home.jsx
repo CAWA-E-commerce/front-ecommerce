@@ -73,20 +73,21 @@ const Home = () => {
     const fetchAndTransform = async () => {
       try {
         const [xmlRes, xsltRes] = await Promise.all([
-          fetch('http://127.0.0.1:5000/products'),
-          fetch('http://127.0.0.1:5000/static/xslt/product-style.xslt'),
+          fetch(`${import.meta.env.VITE_API_URL}/products`),
+          fetch(import.meta.env.VITE_XSLT_URL),
         ]);
 
+    
         const xmlText = await xmlRes.text();
         const xsltText = await xsltRes.text();
-
+    
         const parser = new DOMParser();
         const xml = parser.parseFromString(xmlText, 'application/xml');
         const xslt = parser.parseFromString(xsltText, 'application/xml');
-
+    
         const xsltProcessor = new XSLTProcessor();
         xsltProcessor.importStylesheet(xslt);
-
+    
         const resultDoc = xsltProcessor.transformToFragment(xml, document);
         resultRef.current.innerHTML = '';
         resultRef.current.appendChild(resultDoc);
@@ -95,7 +96,6 @@ const Home = () => {
         console.error(err);
       }
     };
-
     fetchAndTransform();
 
     return () => {

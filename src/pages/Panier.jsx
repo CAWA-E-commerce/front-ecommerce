@@ -87,7 +87,7 @@ const Panier = () => {
 
     try {
       setError(null);
-      const response = await fetch('http://127.0.0.1:5000/commands', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/commands`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/xml',

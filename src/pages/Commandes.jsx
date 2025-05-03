@@ -41,10 +41,9 @@ const Commandes = () => {
       setSuccess(null);
   
       const [xmlRes, xsltRes] = await Promise.all([
-        fetch(`http://127.0.0.1:5000/commands/${commandId}`),
-        fetch('http://127.0.0.1:5000/static/xslt/command-style.xslt')
+        fetch(`${import.meta.env.VITE_API_URL}/commands/${commandId}`),
+        fetch(import.meta.env.VITE_COMMAND_XSLT_URL)
       ]);
-  
       if (!xmlRes.ok) {
         if (xmlRes.status === 404) {
           setError(`Commande #${commandId} introuvable`);
