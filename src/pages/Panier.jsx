@@ -1,42 +1,12 @@
 import React, { useState } from 'react';
-import { Typography, Button, Box, IconButton, Alert } from '@mui/material';
-import {
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Remove as RemoveIcon,
-} from '@mui/icons-material';
-import Threads from '../Backgrounds/Threads/Threads';
+import { Box } from '@mui/material';
 import useCartStore from '../stores/cartStore';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from '@mui/material';
-
-const CheckoutConfirmationModal = ({ open, onClose, commandId, onViewOrder }) => {
-  return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Commande Confirmée</DialogTitle>
-      <DialogContent>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          Votre commande a été enregistrée avec succès. Voici votre ID de commande : <strong>{commandId}</strong>.
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Veuillez conserver cet ID pour consulter votre commande ultérieurement.
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
-          Continuer les achats
-        </Button>
-        <Button onClick={onViewOrder} variant="contained" color="primary">
-          Voir la commande
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
+import Threads from '../Backgrounds/Threads/Threads';
+import CartHeader from '../components/Panier/CartHeader';
+import CartError from '../components/Panier/CartError';
+import CartList from '../components/Panier/CartList';
+import CartSummary from '../components/Panier/CartSummary';
+import CheckoutConfirmationModal from '../components/Panier/CheckoutConfirmationModal';
 
 const Panier = () => {
   const { items, removeFromCart, updateQuantity, getTotal, clearCart } = useCartStore();
@@ -57,10 +27,8 @@ const Panier = () => {
       return;
     }
 
-    // Log cart items for debugging
     console.log('Cart items:', items);
 
-    // Validate each item
     for (const item of items) {
       if (!item.id || item.id === '') {
         console.log('Invalid item (missing ID):', item);
@@ -84,15 +52,14 @@ const Panier = () => {
       }
     }
 
-    // Convert cart items to XML, escaping special characters
     const escapeXml = (unsafe) => {
       return unsafe.replace(/[<>&'"]/g, (c) => {
         switch (c) {
-          case '<': return '&lt;';
-          case '>': return '&gt;';
-          case '&': return '&amp;';
-          case '\'': return '&apos;';
-          case '"': return '&quot;';
+          case '<': return '<';
+          case '>': return '>';
+          case '&': return '&';
+          case '\'': return '';
+          case '"': return '"';
           default: return c;
         }
       });
@@ -136,7 +103,7 @@ const Panier = () => {
       const data = await response.json();
       setCommandId(data.id);
       setModalOpen(true);
-      clearCart(); // Clear the cart after successful checkout
+      clearCart();
     } catch (err) {
       setError(`Erreur lors de la commande : ${err.message}`);
       console.error('Checkout error:', err);
@@ -168,41 +135,8 @@ const Panier = () => {
           paddingBlock: '10vh',
         }}
       >
-        <Typography
-          variant="h1"
-          style={{
-            alignSelf: 'center',
-            color: 'white',
-            fontFamily: 'title',
-            marginBottom: '1rem',
-          }}
-        >
-          Your Cart
-        </Typography>
-
-        <Button
-          variant="outlined"
-          onClick={() => window.location.href = '/'}
-          sx={{
-            color: '#4CAF50',
-            borderColor: '#4CAF50',
-            fontFamily: 'title',
-            mb: 3,
-            '&:hover': {
-              backgroundColor: 'rgba(76, 175, 80, 0.1)',
-              borderColor: '#45a049',
-            },
-          }}
-        >
-          Retour à l'accueil
-        </Button>
-
-        {error && (
-          <Alert severity="error" sx={{ width: '80%', maxWidth: '800px', mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
+        <CartHeader />
+        <CartError error={error} />
         <Box
           sx={{
             width: '80%',
@@ -214,139 +148,25 @@ const Panier = () => {
             marginBottom: '2rem',
           }}
         >
-          {items.length === 0 ? (
-            <Typography
-              variant="h5"
-              style={{
-                color: 'white',
-                textAlign: 'center',
-                fontFamily: 'title',
-              }}
-            >
-              Your cart is empty
-            </Typography>
-          ) : (
-            <>
-              {items.map((item) => (
-                <Box
-                  key={item.id}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '1rem',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                    marginBottom: '1rem',
-                  }}
-                >
-                  <Box
-                    sx={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      style={{
-                        width: '80px',
-                        height: '80px',
-                        objectFit: 'cover',
-                        borderRadius: '10px',
-                      }}
-                    />
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        style={{ color: 'white', fontFamily: 'title' }}
-                      >
-                        {item.name}
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        style={{ color: 'white', fontFamily: 'title' }}
-                      >
-                        {item.price} DA
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <IconButton
-                        onClick={() =>
-                          handleQuantityChange(item.id, item.quantity, -1)
-                        }
-                        sx={{ color: 'white' }}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <Typography
-                        variant="body1"
-                        style={{
-                          color: 'white',
-                          fontFamily: 'title',
-                          margin: '0 1rem',
-                        }}
-                      >
-                        {item.quantity}
-                      </Typography>
-                      <IconButton
-                        onClick={() =>
-                          handleQuantityChange(item.id, item.quantity, 1)
-                        }
-                        sx={{ color: 'white' }}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </Box>
-                    <IconButton
-                      onClick={() => removeFromCart(item.id)}
-                      sx={{ color: 'white' }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-              ))}
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: '2rem',
-                  paddingTop: '1rem',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-                }}
-              >
-                <Typography
-                  variant="h5"
-                  style={{ color: 'white', fontFamily: 'title' }}
-                >
-                  Total: {getTotal().toFixed(2)} DA
-                </Typography>
-                <Button
-                  variant="contained"
-                  onClick={handleCheckout}
-                  sx={{
-                    backgroundColor: '#4CAF50',
-                    '&:hover': { backgroundColor: '#45a049' },
-                    fontFamily: 'title',
-                  }}
-                >
-                  Checkout
-                </Button>
-              </Box>
-            </>
-          )}
+          <CartList
+            items={items}
+            handleQuantityChange={handleQuantityChange}
+            removeFromCart={removeFromCart}
+          />
+          <CartSummary
+            getTotal={getTotal}
+            handleCheckout={handleCheckout}
+            items={items}
+          />
         </Box>
         <Threads amplitude={1} distance={0} enableMouseInteraction={true} />
+        <CheckoutConfirmationModal
+          open={modalOpen}
+          onClose={handleContinueShopping}
+          commandId={commandId}
+          onViewOrder={handleViewOrder}
+        />
       </div>
-
-      <CheckoutConfirmationModal
-        open={modalOpen}
-        onClose={handleContinueShopping}
-        commandId={commandId}
-        onViewOrder={handleViewOrder}
-      />
     </div>
   );
 };

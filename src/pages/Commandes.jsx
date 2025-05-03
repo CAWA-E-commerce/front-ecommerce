@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  Typography, Box, Paper, Button, Alert,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, CircularProgress
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import './Commandes.css'; // Import the CSS file for XSLT styling
+import { Box } from '@mui/material';
+import CommandHeader from '../components/Commands/CommandHeader';
+import CommandSearch from '../components/Commands/CommandSearch';
+import CommandFeedback from '../components/Commands/CommandFeedback';
+import CommandResult from '../components/Commands/CommandResult';
+import DeleteConfirmationModal from '../components/Commands/DeleteConfirmationModal';
+import './Commandes.css';
 
 const Commandes = () => {
   const [error, setError] = useState(null);
@@ -161,93 +161,25 @@ const Commandes = () => {
 
   return (
     <Box className="min-h-screen bg-gray-900 p-8">
-      <Paper elevation={3} sx={{ backgroundColor: '#1E293B', p: 3, mb: 4, borderRadius: '10px', borderLeft: '6px solid #3B82F6', margin:"auto", display:"flex", justifyContent:"center", flexDirection:"column", alignItems:"center" }}>
-        <Typography
-          variant="h1"
-          style={{
-            alignSelf: 'center',
-            color: 'white',
-            fontFamily: 'title',
-            marginBottom: '1rem',
-          }}
-        >
-          Commandes
-        </Typography>
-        
-        <Button
-          variant="outlined"
-          onClick={() => window.location.href = '/'}
-          sx={{
-            color: '#4CAF50',
-            borderColor: '#4CAF50',
-            fontFamily: 'title',
-            mb: 3,
-            '&:hover': {
-              backgroundColor: 'rgba(76, 175, 80, 0.1)',
-              borderColor: '#45a049',
-            },
-            width:"200px"
-          }}
-        >
-          Retour à l'accueil
-        </Button>
-      </Paper>
-  
-      <Paper elevation={3} sx={{ backgroundColor: '#1E293B', p: 3, mb: 4, borderRadius: '10px' }}>
-        <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>
-          Rechercher votre commande
-        </Typography>
-  
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <TextField
-            label="Entrer l'ID de commande"
-            variant="outlined"
-            fullWidth
-            value={enteredCommandId}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            InputProps={{
-              sx: {
-                color: 'white',
-                '.MuiOutlinedInput-notchedOutline': { borderColor: '#4B5563' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#6B7280' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3B82F6' },
-              },
-            }}
-            InputLabelProps={{ sx: { color: '#94A3B8' } }}
-          />
-          <Button variant="contained" color="primary" onClick={handleSearchCommand}>
-            <SearchIcon />
-          </Button>
-        </Box>
-      </Paper>
-  
-      {error && <Alert severity="error" sx={{ mb: 4 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 4 }}>{success}</Alert>}
-  
-      <Box sx={{ backgroundColor: '#1E293B', p: 3, borderRadius: '10px', color: 'white' }}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
-            <CircularProgress size={60} thickness={4} color="primary" />
-          </Box>
-        ) : enteredCommandId === '' && !error ? (
-          <Typography sx={{ textAlign: 'center' }}>
-            Aucune commande affichée. Veuillez entrer un ID de commande.
-          </Typography>
-        ) : null}
-        <div ref={resultRef}></div>
-      </Box>
-
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Confirmer la suppression</DialogTitle>
-        <DialogContent>
-          <Typography>Êtes-vous sûr de vouloir supprimer cette commande ?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">Annuler</Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">Supprimer</Button>
-        </DialogActions>
-      </Dialog>
+      <CommandHeader />
+      <CommandSearch
+        enteredCommandId={enteredCommandId}
+        handleInputChange={handleInputChange}
+        handleKeyPress={handleKeyPress}
+        handleSearchCommand={handleSearchCommand}
+      />
+      <CommandFeedback error={error} success={success} />
+      <CommandResult
+        loading={loading}
+        enteredCommandId={enteredCommandId}
+        error={error}
+        resultRef={resultRef}
+      />
+      <DeleteConfirmationModal
+        open={openDialog}
+        onClose={handleDialogClose}
+        onConfirm={handleDeleteConfirm}
+      />
     </Box>
   );
 };
