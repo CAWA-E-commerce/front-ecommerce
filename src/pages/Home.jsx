@@ -13,8 +13,7 @@ const Home = () => {
   const addToCart = useCartStore((state) => state.addToCart);
   const cartItems = useCartStore((state) => state.items);
   const navigate = useNavigate();
-  
-  // Add state for modal
+
   const [modalOpen, setModalOpen] = useState(false);
   const [addedProduct, setAddedProduct] = useState(null);
 
@@ -26,15 +25,14 @@ const Home = () => {
         price: parseFloat(button.getAttribute('data-product-price')),
         image: button.getAttribute('data-product-image'),
       };
-    
+
       console.log('Button attributes:', {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: product.image
+        image: product.image,
       });
-    
-      // Validate product ID
+
       if (!product.id || product.id === '') {
         console.warn('Cannot add product to cart: missing or empty product ID');
         button.textContent = 'Erreur: ID manquant';
@@ -45,8 +43,7 @@ const Home = () => {
         }, 1000);
         return;
       }
-    
-      // Validate other attributes
+
       if (!product.name || isNaN(product.price) || !product.image) {
         console.warn('Cannot add product to cart: invalid product details');
         button.textContent = 'Erreur: Données invalides';
@@ -57,11 +54,11 @@ const Home = () => {
         }, 1000);
         return;
       }
-    
+
       addToCart(product);
       setAddedProduct(product);
       setModalOpen(true);
-    
+
       button.textContent = 'Ajouté !';
       button.style.backgroundColor = '#4CAF50';
       setTimeout(() => {
@@ -77,17 +74,16 @@ const Home = () => {
           fetch(import.meta.env.VITE_XSLT_URL),
         ]);
 
-    
         const xmlText = await xmlRes.text();
         const xsltText = await xsltRes.text();
-    
+
         const parser = new DOMParser();
         const xml = parser.parseFromString(xmlText, 'application/xml');
         const xslt = parser.parseFromString(xsltText, 'application/xml');
-    
+
         const xsltProcessor = new XSLTProcessor();
         xsltProcessor.importStylesheet(xslt);
-    
+
         const resultDoc = xsltProcessor.transformToFragment(xml, document);
         resultRef.current.innerHTML = '';
         resultRef.current.appendChild(resultDoc);
@@ -123,7 +119,7 @@ const Home = () => {
     <div
       style={{
         overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
       }}
     >
       <div
@@ -131,7 +127,7 @@ const Home = () => {
           position: 'absolute',
           top: '20px',
           right: '20px',
-          zIndex: 10
+          zIndex: 10,
         }}
       >
         <Tooltip title="Voir le panier">
@@ -141,11 +137,11 @@ const Home = () => {
               backgroundColor: 'rgba(0, 0, 0, 0.2)',
               color: 'white',
               borderRadius: '50%',
-              padding: '10px'
+              padding: '10px',
             }}
           >
             <Badge badgeContent={cartItems.length} color="primary">
-              <ShoppingBasketIcon sx={{fontSize:"40px"}} />
+              <ShoppingBasketIcon sx={{ fontSize: '40px' }} />
             </Badge>
           </IconButton>
         </Tooltip>
@@ -156,11 +152,11 @@ const Home = () => {
               backgroundColor: 'rgba(0, 0, 0, 0.2)',
               color: 'white',
               borderRadius: '50%',
-              padding: '10px'
+              padding: '10px',
             }}
           >
             <Badge color="primary">
-              <StoreIcon sx={{fontSize:"40px"}} />
+              <StoreIcon sx={{ fontSize: '40px' }} />
             </Badge>
           </IconButton>
         </Tooltip>
@@ -203,7 +199,7 @@ const Home = () => {
 
       {error && <Typography color="error">{error}</Typography>}
       <div ref={resultRef} />
-      
+
       <CartConfirmationModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
