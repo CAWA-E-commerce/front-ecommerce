@@ -58,10 +58,10 @@
   bottom: 24px;
   right: 24px;
   cursor: pointer;
-
+  border: none;
   background: #f8b024;
   color: #1a1a1a;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.7rem;
   border-radius: 8px;
   text-align: center;
   font-family: 'Sora', sans-serif;

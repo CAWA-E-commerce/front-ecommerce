@@ -1,9 +1,23 @@
 import { Box, Typography, CircularProgress } from '@mui/material';
-
+import '../../pages/Commandes.css';
 const CommandResult = ({ loading, enteredCommandId, error, resultRef }) => (
-  <Box sx={{ backgroundColor: '#1E293B', p: 3, borderRadius: '10px', color: 'white' }}>
+  <Box
+    sx={{
+      backgroundColor: '#1E293B',
+      p: 3,
+      borderRadius: '10px',
+      color: 'white',
+    }}
+  >
     {loading ? (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '300px',
+        }}
+      >
         <CircularProgress size={60} thickness={4} color="primary" />
       </Box>
     ) : enteredCommandId === '' && !error ? (
