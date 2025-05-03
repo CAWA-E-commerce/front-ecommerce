@@ -1,15 +1,24 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Typography } from '@mui/material';
+import { Typography, IconButton, Tooltip, Badge } from '@mui/material';
+import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import Threads from '../Backgrounds/Threads/Threads';
 import useCartStore from '../stores/cartStore';
+import { useNavigate } from 'react-router-dom';
+import CartConfirmationModal from '../components/CartConfirmationModal';
+import StoreIcon from '@mui/icons-material/Store';
 
 const Home = () => {
   const [error, setError] = useState(null);
   const resultRef = useRef();
   const addToCart = useCartStore((state) => state.addToCart);
+  const cartItems = useCartStore((state) => state.items);
+  const navigate = useNavigate();
+  
+  // Add state for modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [addedProduct, setAddedProduct] = useState(null);
 
   useEffect(() => {
-    // Exposer la fonction addToCart au window pour qu'elle soit accessible depuis le XSLT
     window.addToCart = (button) => {
       const product = {
         id: button.getAttribute('data-product-id'),
@@ -17,8 +26,31 @@ const Home = () => {
         price: parseFloat(button.getAttribute('data-product-price')),
         image: button.getAttribute('data-product-image'),
       };
+      console.log('Button attributes:', {
+        id: button.getAttribute('data-product-id'),
+        name: button.getAttribute('data-product-name'),
+        price: button.getAttribute('data-product-price'),
+        image: button.getAttribute('data-product-image')
+      });
       console.log('product to add:', product);
+
+      // Validate product ID
+      if (!product.id || product.id === '') {
+        console.warn('Cannot add product to cart: missing or empty product ID');
+        button.textContent = 'Erreur: ID manquant';
+        button.style.backgroundColor = '#f44336';
+        setTimeout(() => {
+          button.textContent = 'Ajouter au panier';
+          button.style.backgroundColor = '';
+        }, 1000);
+        return;
+      }
+
       addToCart(product);
+
+      // Save the added product and show modal
+      setAddedProduct(product);
+      setModalOpen(true);
 
       button.textContent = 'Ajouté !';
       button.style.backgroundColor = '#4CAF50';
@@ -56,18 +88,74 @@ const Home = () => {
 
     fetchAndTransform();
 
-    // Nettoyage
     return () => {
       delete window.addToCart;
     };
   }, [addToCart]);
 
+  const goToPanierPage = () => {
+    navigate('/panier');
+  };
+  const goToOrdersPage = () => {
+    navigate('/commandes');
+  };
+
+  const handleContinueShopping = () => {
+    setModalOpen(false);
+  };
+
+  const handleGoToCart = () => {
+    setModalOpen(false);
+    navigate('/panier');
+  };
+
   return (
     <div
       style={{
         overflow: 'hidden',
+        position: 'relative'
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 10
+        }}
+      >
+        <Tooltip title="Voir le panier">
+          <IconButton
+            onClick={goToPanierPage}
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+              color: 'white',
+              borderRadius: '50%',
+              padding: '10px'
+            }}
+          >
+            <Badge badgeContent={cartItems.length} color="primary">
+              <ShoppingBasketIcon sx={{fontSize:"40px"}} />
+            </Badge>
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Voir mes commandes">
+          <IconButton
+            onClick={goToOrdersPage}
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+              color: 'white',
+              borderRadius: '50%',
+              padding: '10px'
+            }}
+          >
+            <Badge badgeContent={cartItems.length} color="primary">
+              <StoreIcon sx={{fontSize:"40px"}} />
+            </Badge>
+          </IconButton>
+        </Tooltip>
+      </div>
+
       <div
         style={{
           width: '100%',
@@ -105,6 +193,14 @@ const Home = () => {
 
       {error && <Typography color="error">{error}</Typography>}
       <div ref={resultRef} />
+      
+      <CartConfirmationModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        productName={addedProduct?.name || ''}
+        onContinueShopping={handleContinueShopping}
+        onGoToCart={handleGoToCart}
+      />
     </div>
   );
 };
